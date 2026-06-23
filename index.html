@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOV + Influencers — Julio Regalado 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root {
+  --red:#E31837; --dark-red:#B0121F; --bg:#0D0D0D; --surface:#161616;
+  --surface2:#1E1E1E; --border:#2A2A2A; --text:#F0F0F0; --muted:#888;
+  --dim:#555; --walmart:#0071CE; --chedraui:#F7941D; --bodega:#2E7D32;
+  --heb:#CE93D8; --te:#FFD700; --tsi:#00BCD4; --ttk:#FF69B4; --tig:#E040FB;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.badge{background:var(--red);color:#fff;font-weight:800;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border-radius:4px;}
+.htitle{font-weight:700;font-size:15px;}
+.hsub{font-size:11px;color:var(--muted);margin-top:1px;}
+.hright{display:flex;align-items:center;gap:10px;}
+.hperiod{font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);padding:4px 12px;border-radius:20px;}
+.hstatus{font-size:10px;color:var(--dim);padding:4px 10px;border-radius:20px;border:1px solid var(--border);}
+.hstatus.ok{color:#4CAF50;border-color:#4CAF50;}
+.hstatus.err{color:var(--red);border-color:var(--red);}
+main{padding:20px 28px;display:flex;flex-direction:column;gap:20px;}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);}
+.tab{padding:8px 18px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.15s;}
+.tab.active{color:var(--red);border-bottom-color:var(--red);}
+.tab:hover:not(.active){color:var(--text);}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.kl{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.kv{font-size:20px;font-weight:800;line-height:1;}
+.ks{font-size:10px;color:var(--dim);margin-top:3px;}
+.ka{color:var(--red);}
+.kp{color:#4CAF50;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 22px 22px;}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:12px;flex-wrap:wrap;}
+.ctitle{font-size:13px;font-weight:700;}
+.cdesc{font-size:10px;color:var(--muted);margin-top:2px;}
+.legrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);}
+.ld{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.ll{width:18px;height:2px;flex-shrink:0;}
+.lp{width:9px;height:14px;border-radius:2px;flex-shrink:0;}
+#tt{position:fixed;background:#1a1a1a;border:1px solid var(--border);border-radius:8px;padding:11px 14px;pointer-events:none;z-index:9999;font-size:11px;min-width:210px;max-width:270px;box-shadow:0 8px 24px rgba(0,0,0,.6);display:none;}
+.tt-date{font-weight:700;font-size:12px;color:var(--text);margin-bottom:7px;border-bottom:1px solid var(--border);padding-bottom:5px;}
+.tt-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:3px;color:var(--muted);}
+.tt-brand{display:flex;align-items:center;gap:5px;}
+.tt-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.tt-val{font-weight:600;color:var(--text);}
+.tt-div{border:none;border-top:1px solid var(--border);margin:7px 0;}
+.tt-ptitle{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:4px;font-weight:600;}
+.tt-prow{display:flex;align-items:center;gap:5px;margin-bottom:3px;color:var(--muted);}
+.ptag{font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;text-transform:uppercase;flex-shrink:0;}
+.loading{display:flex;align-items:center;justify-content:center;height:200px;color:var(--muted);font-size:13px;gap:10px;}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:14px;">
+    <div class="badge">Soriana</div>
+    <div>
+      <div class="htitle">SOV + Influencers — Julio Regalado</div>
+      <div class="hsub">Correlación entre publicaciones de creadores y Share of Voice / Venta diaria</div>
+    </div>
+  </div>
+  <div class="hright">
+    <div class="hstatus" id="dataStatus">Cargando datos…</div>
+    <div class="hperiod" id="periodLabel">—</div>
+  </div>
+</header>
+
+<main>
+  <div id="loadingScreen" class="loading"><div class="spinner"></div>Cargando datos desde Google Sheets…</div>
+
+  <div id="appContent" style="display:none;flex-direction:column;gap:20px;">
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi"><div class="kl">SOV Prom. Soriana</div><div class="kv ka" id="k1">—</div><div class="ks">excl. outliers</div></div>
+      <div class="kpi"><div class="kl">Venta Tienda Prom.</div><div class="kv" id="k2">—</div><div class="ks">por día</div></div>
+      <div class="kpi"><div class="kl">Venta en Línea Prom.</div><div class="kv" id="k3">—</div><div class="ks">por día</div></div>
+      <div class="kpi"><div class="kl">Días con creadores</div><div class="kv" id="k4">—</div><div class="ks">publicaciones activas</div></div>
+      <div class="kpi"><div class="kl">SOV días con creadores</div><div class="kv kp" id="k5">—</div><div class="ks">vs <span id="k5b" style="color:var(--dim)">—</span> sin creadores</div></div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <div class="tab active" onclick="setTab(0,this)">SOV por Marca</div>
+      <div class="tab" onclick="setTab(1,this)">Venta Tienda</div>
+      <div class="tab" onclick="setTab(2,this)">Venta en Línea</div>
+      <div class="tab" onclick="setTab(4,this)">Calendario</div>
+    </div>
+
+    <!-- PANEL 0: SOV -->
+    <div id="p0" class="card">
+      <div class="ch">
+        <div><div class="ctitle">SOV por Marca — Diario</div><div class="cdesc">% de menciones por marca. Círculos arriba = tipo de publicación activa ese día.</div></div>
+        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+          <div class="legrow">
+            <div class="li"><div class="ld" style="background:var(--walmart)"></div>Walmart</div>
+            <div class="li"><div class="ld" style="background:var(--red)"></div>Soriana</div>
+            <div class="li"><div class="ld" style="background:var(--chedraui)"></div>Chedraui</div>
+            <div class="li"><div class="ld" style="background:var(--bodega)"></div>Bodega</div>
+            <div class="li"><div class="ld" style="background:var(--heb)"></div>HEB</div>
+          </div>
+          <div class="legrow">
+            <div class="li"><div class="lp" style="background:var(--te)"></div>Espejo (E)</div>
+            <div class="li"><div class="lp" style="background:var(--tsi)"></div>Stories IG (SI)</div>
+            <div class="li"><div class="lp" style="background:var(--ttk)"></div>TikTok (TK)</div>
+            <div class="li"><div class="lp" style="background:var(--tig)"></div>Instagram (IG)</div>
+          </div>
+        </div>
+      </div>
+      <div style="position:relative;height:300px;"><canvas id="c0"></canvas></div>
+    </div>
+
+    <!-- PANEL 1 -->
+    <div id="p1" class="card" style="display:none;">
+      <div class="ch">
+        <div><div class="ctitle">Venta Tienda + % SOV Soriana</div><div class="cdesc">Eje izq: venta física (MXN). Eje der: % SOV. Puntos grandes = día con creador activo.</div></div>
+        <div class="legrow">
+          <div class="li"><div class="ll" style="background:var(--red)"></div>Venta Tienda</div>
+          <div class="li"><div class="ll" style="background:var(--chedraui)"></div>% SOV</div>
+          <div class="li"><div style="width:9px;height:9px;border-radius:50%;background:var(--red);border:2px solid #fff;flex-shrink:0"></div>Con creador</div>
+        </div>
+      </div>
+      <div style="position:relative;height:300px;"><canvas id="c1"></canvas></div>
+    </div>
+
+    <!-- PANEL 2 -->
+    <div id="p2" class="card" style="display:none;">
+      <div class="ch">
+        <div><div class="ctitle">Venta en Línea + % SOV Soriana</div><div class="cdesc">Eje izq: venta ecommerce (MXN). Eje der: % SOV. Puntos grandes = día con creador activo.</div></div>
+        <div class="legrow">
+          <div class="li"><div class="ll" style="background:#7C4DFF"></div>Venta en Línea</div>
+          <div class="li"><div class="ll" style="background:var(--chedraui)"></div>% SOV</div>
+          <div class="li"><div style="width:9px;height:9px;border-radius:50%;background:#7C4DFF;border:2px solid #fff;flex-shrink:0"></div>Con creador</div>
+        </div>
+      </div>
+      <div style="position:relative;height:300px;"><canvas id="c2"></canvas></div>
+    </div>
+
+    <!-- PANEL 3 removed -->
+    <div id="p3" style="display:none;">
+      <div class="ch">
+        <div><div class="ctitle">Correlación: Creadores activos vs SOV</div><div class="cdesc">Cada burbuja = un día. Eje X = # creadores publicando. Eje Y = % SOV Soriana. Tamaño = Venta Tienda.</div></div>
+        <div class="legrow">
+          <div class="li"><div class="ld" style="background:var(--red)"></div>SOV alto</div>
+          <div class="li"><div class="ld" style="background:var(--muted)"></div>SOV bajo</div>
+          <div class="li"><span style="font-size:10px;color:var(--muted)">Tamaño = Venta Tienda</span></div>
+        </div>
+      </div>
+      <div style="position:relative;height:320px;"><canvas id="c3"></canvas></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:8px;font-style:italic;">Jun 8 excluido — spike viral de 8,904 menciones, no atribuible a creadores.</div>
+    </div>
+
+    <!-- PANEL 4 -->
+    <div id="p4" class="card" style="display:none;">
+      <div class="ch">
+        <div><div class="ctitle">Calendario de Publicaciones</div><div class="cdesc">E = Espejo (TK+Meta) · SI = Stories IG · TK = TikTok · IG = Instagram. SOV del día en gris bajo la fecha.</div></div>
+      </div>
+      <div id="cal" style="overflow-x:auto;"></div>
+    </div>
+
+  </div><!-- /appContent -->
+</main>
+
+<div id="tt"></div>
+
+<script>
+// ── INFLUENCER PUBS (static — update manually when new creators added) ────
+const influencerPubs = {
+  "2026-06-01":[["10 micro y nano","E"]],
+  "2026-06-02":[["10 micro y nano","E"]],
+  "2026-06-03":[["DJ","E"],["10 micro y nano","E"]],
+  "2026-06-04":[["10 micro y nano","E"]],
+  "2026-06-05":[["10 micro y nano","E"]],
+  "2026-06-06":[["10 micro y nano","E"]],
+  "2026-06-07":[["10 micro y nano","E"]],
+  "2026-06-08":[["Aldo","E"],["10 micro y nano","E"]],
+  "2026-06-09":[["10 micro y nano","E"]],
+  "2026-06-10":[["Mariana Gr.","SI"],["10 micro y nano","E"]],
+  "2026-06-11":[["Mariana Gr.","E"],["Gera Zapian","SI"],["Azul","SI"],["10 micro y nano","E"]],
+  "2026-06-12":[["Xime Rico","SI"],["Juan Capo","SI"],["Sandy","SI"],["Andrea de N.","SI"],["Happening Antro","SI"],["10 micro y nano","E"]],
+  "2026-06-13":[["Xime Rico","E"],["Juan Capo","E"],["10 micro y nano","E"]],
+  "2026-06-14":[["Gera Zapian","E"],["Happening Antro","SI"],["10 micro y nano","E"]],
+  "2026-06-15":[["Sandy","E"],["Roy Villanueva","E"],["10 micro y nano","E"]],
+  "2026-06-16":[["Julio","E"],["Mike Giralt","SI"],["10 micro y nano","E"]],
+  "2026-06-17":[["Lylo","SI"],["Celina","SI"],["Elena del Rio","E"],["10 micro y nano","E"]],
+  "2026-06-18":[["Josh Juanico","SI"],["Julio","SI"],["10 micro y nano","E"]],
+  "2026-06-19":[["Chingu","SI"],["Claus","SI"],["Roy Villanueva","E"],["Mariana Gr.","E"],["Gera Zapian","E"],["Celina","SI"],["Elena del Rio","SI"],["Azul","E"],["10 micro y nano","E"]],
+  "2026-06-20":[["Lylo","E"],["10 micro y nano","E"]],
+  "2026-06-21":[["Chingu","TK"],["Andrea de N.","E"],["10 micro y nano","E"]],
+  "2026-06-22":[["Fer Jalil","SI"],["Claus","IG"],["Alex Zuart","E"],["Gera Zapian","E"],["Mike Giralt","E"],["10 micro y nano","E"]],
+  "2026-06-23":[["Chingu","SI"],["Fer Jalil","E"],["Croda Alejandro","E"],["Emiliano","E"],["10 micro y nano","E"]],
+  "2026-06-24":[["Claus","SI"],["Xime Rico","SI"],["Azul","SI"],["10 micro y nano","E"]],
+  "2026-06-25":[["Fer Lozano","SI"],["10 micro y nano","E"]],
+  "2026-06-26":[["Fer Lozano","E"],["Josh Juanico","E"],["Claus","TK"],["Alex Zuart","E"],["Sandy","E"],["Felipe","E"],["Elena del Rio","SI"],["10 micro y nano","E"]],
+  "2026-06-27":[["Celina","E"],["10 micro y nano","E"]],
+  "2026-06-28":[["Julio","E"],["Croda Alejandro","E"],["10 micro y nano","E"]],
+  "2026-06-29":[["Roy Villanueva","E"],["10 micro y nano","E"]],
+  "2026-06-30":[["Julio","SI"],["Mariana Gr.","SI"],["Celina","E"],["10 micro y nano","E"]],
+};
+
+const pubColors  = {E:'#FFD700',SI:'#00BCD4',TK:'#FF69B4',IG:'#E040FB',PR:'#888'};
+const pubTextC   = {E:'#000',SI:'#000',TK:'#000',IG:'#fff',PR:'#fff'};
+const brandColors= {Walmart:'#0071CE',Soriana:'#E31837',Chedraui:'#F7941D',Bodega:'#2E7D32',HEB:'#CE93D8'};
+const brands     = ['Walmart','Soriana','Chedraui','Bodega','HEB'];
+const MONTHS_ES  = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const DAYS_ES    = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+// ── CSV PARSER ────────────────────────────────────────────
+// Splits a CSV line respecting quoted fields (e.g. "$530,751,901")
+function splitCSVLine(line) {
+  const cols = [];
+  let cur = '', inQ = false;
+  for (const ch of line) {
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+    else cur += ch;
+  }
+  cols.push(cur.trim());
+  return cols;
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length < 2) return {};
+
+  // Find columns by name — tolerant of extra spaces, accents, extra columns
+  const headers = splitCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+  // Find column by name — exact match first, then partial
+  const idx = name => {
+    const clean = s => s.replace(/[^a-z0-9]/g,'').toLowerCase();
+    const nc = clean(name);
+    // exact match
+    let i = headers.findIndex(h => clean(h) === nc);
+    if (i >= 0) return i;
+    // partial match only if search term is not empty
+    if (nc === '') return -1;
+    return headers.findIndex(h => clean(h).includes(nc));
+  };
+
+  const iDate = idx('fecha');
+  const iBrand= idx('marca');
+  const iMen  = idx('menciones');
+  const iVT   = idx('ventatienda');
+  const iVL   = idx('ventaenlinea');
+  const iSOV  = headers.length - 1; // always last column (%)
+
+  // clean numeric string: remove $, commas, %, spaces
+  const num = s => {
+    if (!s || s.trim() === '') return null;
+    const v = parseFloat(s.replace(/[$,%\s]/g,'').replace(/,/g,''));
+    return isNaN(v) ? null : v;
+  };
+
+  const rawData = {};
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSVLine(lines[i]);
+    const rawDate = iDate  >= 0 ? cols[iDate]  || '' : '';
+    const marca   = iBrand >= 0 ? cols[iBrand] || '' : '';
+    if (!rawDate || !marca) continue;
+
+    // DD/MM/YYYY → YYYY-MM-DD
+    const p = rawDate.split('/');
+    if (p.length !== 3) continue;
+    const yyyy = p[2].length === 4 ? p[2] : '20' + p[2];
+    const date = `${yyyy}-${p[1]}-${p[0]}`;
+
+    if (!rawData[date]) rawData[date] = {};
+    rawData[date][marca] = {
+      sov:       num(iSOV >= 0 ? cols[iSOV]  : null),
+      menciones: iMen >= 0 ? (parseInt(cols[iMen]) || 0) : 0,
+      vt:        num(iVT  >= 0 ? cols[iVT]   : null),
+      vl:        num(iVL  >= 0 ? cols[iVL]   : null),
+    };
+  }
+  return rawData;
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function fmtM(v) { return v>=1e9?(v/1e9).toFixed(1)+'B':v>=1e6?(v/1e6).toFixed(0)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':String(v); }
+function hasCreator(d) { return (influencerPubs[d]||[]).some(([c])=>c!=='10 micro y nano'); }
+function creatorCount(d) { return (influencerPubs[d]||[]).filter(([c])=>c!=='10 micro y nano').length; }
+
+// ── INIT ──────────────────────────────────────────────────
+function init() {
+  // Use embedded CSV — paste new export from Looker/Sheets here to update
+  const csvText = EMBEDDED_CSV;
+  const rawData = parseCSV(csvText);
+  const days = Object.keys(rawData).sort();
+
+  if (days.length === 0) {
+    document.getElementById('loadingScreen').innerHTML =
+      '<div style="color:var(--muted)">Sin datos. Actualiza el CSV en el código.</div>';
+    return;
+  }
+
+  const first = new Date(days[0]+'T12:00:00');
+  const last  = new Date(days[days.length-1]+'T12:00:00');
+  document.getElementById('dataStatus').textContent = `✓ ${days.length} días cargados`;
+  document.getElementById('dataStatus').className = 'hstatus ok';
+  document.getElementById('periodLabel').textContent =
+    `${first.getDate()} ${MONTHS_ES[first.getMonth()+1]} – ${last.getDate()} ${MONTHS_ES[last.getMonth()+1]} ${last.getFullYear()}`;
+
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('appContent').style.display = 'flex';
+  buildDashboard(rawData, days);
+}
+
+// ── DASHBOARD BUILDER ─────────────────────────────────────
+function buildDashboard(rawData, days) {
+  const dayLabels = days.map(d => {
+    const dt = new Date(d+'T12:00:00');
+    return `${dt.getDate()} ${['D','L','M','X','J','V','S'][dt.getDay()]}`;
+  });
+
+  // ── KPIs ──
+  const OUTLIER = '2026-06-08';
+  const dNorm = days.filter(d => d !== OUTLIER && rawData[d].Soriana?.sov != null);
+  if (dNorm.length) {
+    const avgSOV = dNorm.reduce((s,d)=>s+rawData[d].Soriana.sov,0)/dNorm.length;
+    document.getElementById('k1').textContent = avgSOV.toFixed(1)+'%';
+  }
+  const dVT = days.filter(d=>rawData[d].Soriana?.vt);
+  if (dVT.length) document.getElementById('k2').textContent = fmtM(dVT.reduce((s,d)=>s+rawData[d].Soriana.vt,0)/dVT.length);
+  const dVL = days.filter(d=>rawData[d].Soriana?.vl);
+  if (dVL.length) document.getElementById('k3').textContent = fmtM(dVL.reduce((s,d)=>s+rawData[d].Soriana.vl,0)/dVL.length);
+
+  const dWith    = dNorm.filter(d=>hasCreator(d));
+  const dWithout = dNorm.filter(d=>!hasCreator(d));
+  document.getElementById('k4').textContent = dWith.length;
+  if (dWith.length && dWithout.length) {
+    const aWith    = dWith.reduce((s,d)=>s+rawData[d].Soriana.sov,0)/dWith.length;
+    const aWithout = dWithout.reduce((s,d)=>s+rawData[d].Soriana.sov,0)/dWithout.length;
+    document.getElementById('k5').textContent = aWith.toFixed(1)+'%';
+    document.getElementById('k5b').textContent = aWithout.toFixed(1)+'%';
+  }
+
+  // ── ANNOTATION PLUGIN ──
+  const annotPlugin = {
+    id: 'annot',
+    afterDraw(chart) {
+      const {ctx, chartArea, scales} = chart;
+      if (!chartArea || !scales.x) return;
+      days.forEach((d, i) => {
+        const pubs = (influencerPubs[d]||[]).filter(([c])=>c!=='10 micro y nano');
+        if (!pubs.length) return;
+        const xPos = scales.x.getPixelForValue(i);
+        const bw = scales.x.width / days.length;
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.025)';
+        ctx.fillRect(xPos-bw/2, chartArea.top, bw, chartArea.bottom-chartArea.top);
+        const types = {};
+        pubs.forEach(([,t])=>{ types[t]=(types[t]||0)+1; });
+        let ox = xPos - Object.keys(types).length * 6;
+        Object.entries(types).forEach(([t,n]) => {
+          ctx.fillStyle = pubColors[t]||'#888';
+          ctx.beginPath();
+          ctx.arc(ox+5, chartArea.top+9, 5, 0, Math.PI*2);
+          ctx.fill();
+          if (n > 1) {
+            ctx.fillStyle = '#000';
+            ctx.font = 'bold 7px Inter,sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(n, ox+5, chartArea.top+9);
+          }
+          ox += 13;
+        });
+        ctx.restore();
+      });
+    }
+  };
+
+  // ── DATA LABEL PLUGIN (SOV % + menciones inside Soriana bar) ──
+  const dataLabelPlugin = {
+    id: 'dataLabel',
+    afterDatasetsDraw(chart) {
+      if (!chart.options.plugins.dataLabel?.enabled) return;
+      const {ctx, data} = chart;
+      const si = data.datasets.findIndex(d=>d.label==='Soriana');
+      if (si < 0) return;
+      const meta = chart.getDatasetMeta(si);
+      meta.data.forEach((bar, i) => {
+        const val = data.datasets[si].data[i];
+        if (!val || val < 6) return;
+        const d = days[i];
+        const men = rawData[d]?.Soriana?.menciones;
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px Inter,sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const y = bar.y + (bar.base - bar.y) / 2;
+        ctx.fillText(val.toFixed(0)+'%', bar.x, y);
+        if (men) {
+          ctx.font = '8px Inter,sans-serif';
+          ctx.fillStyle = 'rgba(255,255,255,0.55)';
+          ctx.fillText(men.toLocaleString(), bar.x, y+10);
+        }
+        ctx.restore();
+      });
+    }
+  };
+
+  // ── CHART 0: SOV STACKED BAR ──
+  new Chart(document.getElementById('c0').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: dayLabels,
+      datasets: brands.map(b => ({
+        label: b,
+        data: days.map(d => rawData[d][b]?.sov ?? null),
+        backgroundColor: brandColors[b],
+        stack: 'sov',
+        borderWidth: 0,
+      }))
+    },
+    plugins: [annotPlugin, dataLabelPlugin],
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: {duration:500},
+      interaction: {mode:'index', intersect:false},
+      plugins: {legend:{display:false}, tooltip:{enabled:false}, dataLabel:{enabled:true}},
+      scales: {
+        x: {stacked:true, grid:{color:'#1e1e1e'}, ticks:{color:'#555',font:{size:9},maxRotation:55,minRotation:55}},
+        y: {stacked:true, min:0, max:100, grid:{color:'#222'}, ticks:{color:'#666',font:{size:10},callback:v=>v+'%'}}
+      },
+      onHover: (e,el) => handleHover(e, el, 'sov', rawData, days)
+    }
+  });
+
+  // ── CHART 1 & 2: LINE DUAL AXIS ──
+  function buildLine(canvasId, ventaKey, lineColor) {
+    const ventaArr = days.map(d => rawData[d].Soriana?.[ventaKey] ?? null);
+    const sovArr   = days.map(d => rawData[d].Soriana?.sov ?? null);
+    const pr  = days.map(d => hasCreator(d) ? 6 : 3);
+    const pbc = days.map(d => hasCreator(d) ? '#fff' : lineColor);
+    const pbw = days.map(d => hasCreator(d) ? 2 : 0);
+    new Chart(document.getElementById(canvasId).getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: dayLabels,
+        datasets: [
+          {label: ventaKey==='vt'?'Venta Tienda':'Venta en Línea', data:ventaArr,
+           borderColor:lineColor, backgroundColor:lineColor+'18', borderWidth:2.5,
+           pointRadius:pr, pointBackgroundColor:days.map(_=>lineColor),
+           pointBorderColor:pbc, pointBorderWidth:pbw,
+           fill:true, tension:.35, yAxisID:'y'},
+          {label:'% SOV', data:sovArr, borderColor:'#F7941D', backgroundColor:'transparent',
+           borderWidth:1.5, pointRadius:2, pointBackgroundColor:'#F7941D',
+           fill:false, tension:.35, yAxisID:'y2', borderDash:[4,3]}
+        ]
+      },
+      plugins: [annotPlugin],
+      options: {
+        responsive:true, maintainAspectRatio:false, animation:{duration:500},
+        interaction:{mode:'index', intersect:false},
+        plugins:{legend:{display:false}, tooltip:{enabled:false}},
+        scales:{
+          x:{grid:{color:'#1a1a1a'}, ticks:{color:'#555',font:{size:9},maxRotation:55,minRotation:55}},
+          y:{position:'left', grid:{color:'#222'}, ticks:{color:'#888',font:{size:10},callback:v=>fmtM(v)}},
+          y2:{position:'right', grid:{drawOnChartArea:false}, ticks:{color:'#F7941D',font:{size:10},callback:v=>v+'%'}}
+        },
+        onHover: (e,el) => handleHover(e, el, ventaKey, rawData, days)
+      }
+    });
+  }
+  buildLine('c1','vt','#E31837');
+  buildLine('c2','vl','#7C4DFF');
+
+  // ── CHART 3: BUBBLE CORRELATION ──
+  const pts = days.filter(d => d !== OUTLIER && rawData[d].Soriana?.sov != null).map(d => ({
+    x: creatorCount(d),
+    y: rawData[d].Soriana.sov,
+    vt: rawData[d].Soriana.vt,
+    date: d,
+    r: rawData[d].Soriana.vt ? Math.max(5, Math.min(20, rawData[d].Soriana.vt/1e7)) : 5
+  }));
+  const maxS = Math.max(...pts.map(p=>p.y));
+  const minS = Math.min(...pts.map(p=>p.y));
+  new Chart(document.getElementById('c3').getContext('2d'), {
+    type: 'bubble',
+    data: {
+      datasets: [{
+        label: 'Días',
+        data: pts.map(p => ({x:p.x, y:p.y, r:p.r})),
+        backgroundColor: pts.map(p => {
+          const t = (p.y-minS)/(maxS-minS||1);
+          return `rgba(${Math.round(t*227)},${Math.round((1-t)*131)},55,0.8)`;
+        }),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:{duration:500},
+      plugins:{legend:{display:false}, tooltip:{callbacks:{label: ctx => {
+        const p = pts[ctx.dataIndex];
+        const dt = new Date(p.date+'T12:00:00');
+        return `Jun ${dt.getDate()} · SOV ${p.y.toFixed(1)}% · ${p.x} creadores${p.vt?' · '+fmtM(p.vt)+' venta':''}`;
+      }}}},
+      scales:{
+        x:{title:{display:true,text:'Creadores publicando ese día',color:'#666',font:{size:11}}, grid:{color:'#222'}, ticks:{color:'#666',stepSize:1}, min:-0.5},
+        y:{title:{display:true,text:'% SOV Soriana',color:'#666',font:{size:11}}, grid:{color:'#222'}, ticks:{color:'#666',callback:v=>v+'%'}}
+      }
+    }
+  });
+
+  // ── CALENDAR ──
+  window._calBuilt = false;
+  window._buildCal = function() {
+    if (window._calBuilt) return;
+    window._calBuilt = true;
+    const creatorsSet = new Set();
+    days.forEach(d => (influencerPubs[d]||[]).forEach(([c])=>{ if(c!=='10 micro y nano') creatorsSet.add(c); }));
+    const creators = Array.from(creatorsSet).sort();
+    const n = days.length;
+    let html = `<div style="display:grid;grid-template-columns:130px repeat(${n},1fr);gap:1px;background:var(--border);border-radius:6px;overflow:hidden;">`;
+    // header
+    html += `<div style="background:var(--surface);padding:5px 8px;font-size:9px;font-weight:600;color:var(--dim);display:flex;align-items:center;">Creador</div>`;
+    days.forEach(d => {
+      const dt = new Date(d+'T12:00:00');
+      const hc = hasCreator(d);
+      const sov = rawData[d]?.Soriana?.sov;
+      html += `<div style="background:${hc?'rgba(227,24,55,.12)':'var(--surface)'};padding:2px 1px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:34px;">
+        <span style="font-size:9px;font-weight:700;color:${hc?'var(--red)':'var(--muted)'};">${dt.getDate()}</span>
+        <span style="font-size:8px;color:var(--dim);">${['D','L','M','X','J','V','S'][dt.getDay()]}</span>
+        ${sov!=null?`<span style="font-size:7px;color:var(--dim);">${sov.toFixed(0)}%</span>`:''}
+      </div>`;
+    });
+    // creator rows
+    creators.forEach(creator => {
+      html += `<div style="background:var(--surface);padding:3px 8px;font-size:10px;color:var(--muted);border-right:1px solid var(--border);display:flex;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${creator}</div>`;
+      days.forEach(d => {
+        const dp = (influencerPubs[d]||[]).filter(([c])=>c===creator);
+        const cell = dp.map(([,t])=>`<div style="background:${pubColors[t]||'#888'};color:${pubTextC[t]||'#fff'};border-radius:3px;font-size:7px;font-weight:700;padding:1px 3px;text-transform:uppercase;">${t}</div>`).join('');
+        html += `<div style="background:${dp.length?'rgba(255,255,255,.02)':'var(--surface2)'};display:flex;align-items:center;justify-content:center;min-height:24px;gap:1px;">${cell}</div>`;
+      });
+    });
+    // micro row
+    html += `<div style="background:var(--surface);padding:3px 8px;font-size:10px;color:var(--dim);border-right:1px solid var(--border);display:flex;align-items:center;">10 micro y nano</div>`;
+    days.forEach(d => {
+      const hasMicro = (influencerPubs[d]||[]).some(([c])=>c==='10 micro y nano');
+      html += `<div style="background:var(--surface2);display:flex;align-items:center;justify-content:center;min-height:24px;">${hasMicro?'<div style="background:#333;color:#888;border-radius:3px;font-size:7px;font-weight:700;padding:1px 3px;">E</div>':''}</div>`;
+    });
+    html += '</div>';
+    document.getElementById('cal').innerHTML = html;
+  };
+
+  // ── TAB SWITCH ──
+  window.setTab = function(i, el) {
+    [0,1,2,3,4].forEach(j => { document.getElementById('p'+j).style.display='none'; });
+    document.getElementById('p'+i).style.display = 'block';
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    el.classList.add('active');
+    if (i === 4) window._buildCal();
+  };
+
+  // ── TOOLTIP ──
+  const tt = document.getElementById('tt');
+  function handleHover(e, elements, mode, rawData, days) {
+    if (!elements.length) { tt.style.display='none'; return; }
+    const i = elements[0].index;
+    const d = days[i];
+    const dt = new Date(d+'T12:00:00');
+    const sor = rawData[d]?.Soriana || {};
+    const pubs = influencerPubs[d]||[];
+    const creatorPubs = pubs.filter(([c])=>c!=='10 micro y nano');
+    const microN = pubs.filter(([c])=>c==='10 micro y nano').length;
+
+    let html = `<div class="tt-date">${DAYS_ES[dt.getDay()]} ${dt.getDate()} ${MONTHS_ES[dt.getMonth()+1]} ${dt.getFullYear()}</div>`;
+
+    if (mode === 'sov') {
+      brands.forEach(b => {
+        const s = rawData[d][b]?.sov;
+        const m = rawData[d][b]?.menciones;
+        if (s == null) return;
+        html += `<div class="tt-row"><span class="tt-brand"><div class="tt-dot" style="background:${brandColors[b]}"></div>${b}</span><span class="tt-val">${s.toFixed(1)}% <span style="color:var(--dim);font-weight:400">${m?'('+m.toLocaleString()+')':''}</span></span></div>`;
+      });
+    } else {
+      if (sor.vt) html += `<div class="tt-row"><span class="tt-brand"><div class="tt-dot" style="background:#E31837"></div>Vta Tienda</span><span class="tt-val">$${fmtM(sor.vt)}</span></div>`;
+      if (sor.vl) html += `<div class="tt-row"><span class="tt-brand"><div class="tt-dot" style="background:#7C4DFF"></div>Vta Línea</span><span class="tt-val">$${fmtM(sor.vl)}</span></div>`;
+      if (sor.sov != null) html += `<div class="tt-row"><span class="tt-brand"><div class="tt-dot" style="background:#F7941D"></div>SOV</span><span class="tt-val">${sor.sov.toFixed(2)}%</span></div>`;
+      if (sor.menciones) html += `<div class="tt-row"><span class="tt-brand"><div class="tt-dot" style="background:var(--muted)"></div>Menciones</span><span class="tt-val">${sor.menciones.toLocaleString()}</span></div>`;
+    }
+
+    html += `<hr class="tt-div"><div class="tt-ptitle">Publicaciones (${pubs.length})</div>`;
+    creatorPubs.forEach(([c,t]) => {
+      html += `<div class="tt-prow"><span class="ptag" style="background:${pubColors[t]||'#888'};color:${pubTextC[t]||'#fff'}">${t}</span><span>${c}</span></div>`;
+    });
+    if (microN) html += `<div class="tt-prow"><span class="ptag" style="background:#333;color:#888">E</span><span>10 micro y nano ×${microN}</span></div>`;
+    if (!pubs.length) html += `<span style="color:var(--dim);">Sin publicaciones</span>`;
+
+    tt.innerHTML = html;
+    tt.style.display = 'block';
+    let x = e.native.clientX+16, y = e.native.clientY-20;
+    if (x+280>window.innerWidth) x = e.native.clientX-295;
+    if (y+300>window.innerHeight) y = window.innerHeight-310;
+    tt.style.left = x+'px'; tt.style.top = y+'px';
+  }
+
+  document.addEventListener('click', () => tt.style.display='none');
+  document.addEventListener('mousemove', e => {
+    if (tt.style.display==='block') {
+      let x=e.clientX+16, y=e.clientY-20;
+      if (x+280>window.innerWidth) x=e.clientX-295;
+      tt.style.left=x+'px'; tt.style.top=y+'px';
+    }
+  });
+}
+
+// ── BOOT ─────────────────────────────────────────────────
+const EMBEDDED_CSV = `Fecha,Marca,Menciones,Mes ,Año,Venta Tienda,Venta en Linea,%
+01/06/2026,Soriana,247,Junio,2026,"$530,751,901","$7,101,414",11.67%
+01/06/2026,HEB,100,Junio,2026,,,4.72%
+01/06/2026,Walmart,1274,Junio,2026,,,60.18%
+01/06/2026,Bodega,188,Junio,2026,,,8.88%
+01/06/2026,Chedraui,308,Junio,2026,,,14.55%
+02/06/2026,Soriana,199,Junio,2026,"$500,374,773","$6,026,736",8.48%
+02/06/2026,HEB,91,Junio,2026,,,3.88%
+02/06/2026,Walmart,1646,Junio,2026,,,70.16%
+02/06/2026,Bodega,115,Junio,2026,,,4.90%
+02/06/2026,Chedraui,295,Junio,2026,,,12.57%
+03/06/2026,Soriana,198,Junio,2026,"$418,989,311","$7,045,430",15.99%
+03/06/2026,HEB,87,Junio,2026,,,7.03%
+03/06/2026,Walmart,637,Junio,2026,,,51.45%
+03/06/2026,Bodega,81,Junio,2026,,,6.54%
+03/06/2026,Chedraui,235,Junio,2026,,,18.98%
+04/06/2026,Soriana,187,Junio,2026,"$385,965,096","$5,449,592",15.23%
+04/06/2026,HEB,71,Junio,2026,,,5.78%
+04/06/2026,Walmart,626,Junio,2026,,,50.98%
+04/06/2026,Bodega,85,Junio,2026,,,6.92%
+04/06/2026,Chedraui,259,Junio,2026,,,21.09%
+05/06/2026,Soriana,270,Junio,2026,"$416,743,826","$6,042,545",19.96%
+05/06/2026,HEB,65,Junio,2026,,,4.80%
+05/06/2026,Walmart,587,Junio,2026,,,43.39%
+05/06/2026,Bodega,107,Junio,2026,,,7.91%
+05/06/2026,Chedraui,324,Junio,2026,,,23.95%
+06/06/2026,Soriana,124,Junio,2026,"$500,574,113","$5,878,797",12.17%
+06/06/2026,HEB,84,Junio,2026,,,8.24%
+06/06/2026,Walmart,631,Junio,2026,,,61.92%
+06/06/2026,Bodega,62,Junio,2026,,,6.08%
+06/06/2026,Chedraui,118,Junio,2026,,,11.58%
+07/06/2026,Soriana,140,Junio,2026,"$542,163,675","$4,966,867",11.36%
+07/06/2026,HEB,109,Junio,2026,,,8.85%
+07/06/2026,Walmart,731,Junio,2026,,,59.33%
+07/06/2026,Bodega,52,Junio,2026,,,4.22%
+07/06/2026,Chedraui,200,Junio,2026,,,16.23%
+08/06/2026,Soriana,8904,Junio,2026,"$390,543,767","$4,891,233",87.46%
+08/06/2026,HEB,122,Junio,2026,,,1.20%
+08/06/2026,Walmart,831,Junio,2026,,,8.16%
+08/06/2026,Bodega,148,Junio,2026,,,1.45%
+08/06/2026,Chedraui,176,Junio,2026,,,1.73%
+09/06/2026,Soriana,355,Junio,2026,"$406,038,542","$4,792,123",18.94%
+09/06/2026,HEB,69,Junio,2026,,,3.68%
+09/06/2026,Walmart,714,Junio,2026,,,38.10%
+09/06/2026,Bodega,574,Junio,2026,,,30.63%
+09/06/2026,Chedraui,162,Junio,2026,,,8.64%
+10/06/2026,Soriana,297,Junio,2026,"$386,855,607","$4,085,111",22.79%
+10/06/2026,HEB,62,Junio,2026,,,4.76%
+10/06/2026,Walmart,578,Junio,2026,,,44.36%
+10/06/2026,Bodega,194,Junio,2026,,,14.89%
+10/06/2026,Chedraui,172,Junio,2026,,,13.20%
+11/06/2026,Soriana,256,Junio,2026,"$363,187,040","$8,605,159",16.09%
+11/06/2026,HEB,49,Junio,2026,,,3.08%
+11/06/2026,Walmart,642,Junio,2026,,,40.35%
+11/06/2026,Bodega,540,Junio,2026,,,33.94%
+11/06/2026,Chedraui,104,Junio,2026,,,6.54%
+12/06/2026,Soriana,223,Junio,2026,"$433,038,982","$9,652,946",18.48%
+12/06/2026,HEB,48,Junio,2026,,,3.98%
+12/06/2026,Walmart,737,Junio,2026,,,61.06%
+12/06/2026,Bodega,64,Junio,2026,,,5.30%
+12/06/2026,Chedraui,135,Junio,2026,,,11.18%
+13/06/2026,Soriana,163,Junio,2026,"$554,619,435","$7,870,138",15.76%
+13/06/2026,HEB,61,Junio,2026,,,5.90%
+13/06/2026,Walmart,647,Junio,2026,,,62.57%
+13/06/2026,Bodega,46,Junio,2026,,,4.45%
+13/06/2026,Chedraui,117,Junio,2026,,,11.32%
+14/06/2026,Soriana,239,Junio,2026,"$569,635,569","$5,998,603",10.11%
+14/06/2026,HEB,46,Junio,2026,,,1.95%
+14/06/2026,Walmart,1806,Junio,2026,,,76.40%
+14/06/2026,Bodega,71,Junio,2026,,,3.00%
+14/06/2026,Chedraui,202,Junio,2026,,,8.54%
+15/06/2026,Soriana,227,Junio,2026,"$454,097,808","$6,114,585",6.71%
+15/06/2026,HEB,78,Junio,2026,,,2.30%
+15/06/2026,Walmart,921,Junio,2026,,,27.21%
+15/06/2026,Bodega,86,Junio,2026,,,2.54%
+15/06/2026,Chedraui,2073,Junio,2026,,,61.24%
+16/06/2026,Soriana,269,Junio,2026,"$446,756,119","$5,608,109",16.94%
+16/06/2026,HEB,76,Junio,2026,,,4.79%
+16/06/2026,Walmart,705,Junio,2026,,,44.40%
+16/06/2026,Bodega,70,Junio,2026,,,4.41%
+16/06/2026,Chedraui,468,Junio,2026,,,29.47%
+17/06/2026,Soriana,461,Junio,2026,"$391,705,806","$4,672,330",24.75%
+17/06/2026,HEB,61,Junio,2026,,,3.27%
+17/06/2026,Walmart,1107,Junio,2026,,,59.42%
+17/06/2026,Bodega,77,Junio,2026,,,4.13%
+17/06/2026,Chedraui,157,Junio,2026,,,8.43%
+18/06/2026,Soriana,244,Junio,2026,"$370,991,139","$4,643,854",9.05%
+18/06/2026,HEB,75,Junio,2026,,,2.78%
+18/06/2026,Walmart,1881,Junio,2026,,,69.74%
+18/06/2026,Bodega,203,Junio,2026,,,7.53%
+18/06/2026,Chedraui,294,Junio,2026,,,10.90%
+19/06/2026,Soriana,254,Junio,2026,"$380,854,752","$7,411,431",12.75%
+19/06/2026,HEB,430,Junio,2026,,,21.59%
+19/06/2026,Walmart,970,Junio,2026,,,48.69%
+19/06/2026,Bodega,59,Junio,2026,,,2.96%
+19/06/2026,Chedraui,279,Junio,2026,,,14.01%
+20/06/2026,Soriana,154,Junio,2026,"$536,921,613","$6,815,327",17.34%
+20/06/2026,HEB,128,Junio,2026,,,14.41%
+20/06/2026,Walmart,440,Junio,2026,,,49.55%
+20/06/2026,Bodega,60,Junio,2026,,,6.76%
+20/06/2026,Chedraui,106,Junio,2026,,,11.94%
+21/06/2026,Soriana,175,Junio,2026,"$523,912,045","$4,626,484",17.84%
+21/06/2026,HEB,197,Junio,2026,,,20.08%
+21/06/2026,Walmart,456,Junio,2026,,,46.48%
+21/06/2026,Bodega,81,Junio,2026,,,8.26%
+21/06/2026,Chedraui,72,Junio,2026,,,7.34%
+22/06/2026,Soriana,218,Junio,2026,,"$5,837,872",11.91%
+22/06/2026,HEB,120,Junio,2026,,,6.56%
+22/06/2026,Walmart,1292,Junio,2026,,,70.60%
+22/06/2026,Bodega,87,Junio,2026,,,4.75%
+22/06/2026,Chedraui,113,Junio,2026,,,6.17%
+23/06/2026,Soriana,,Junio,2026,,,#DIV/0!
+23/06/2026,HEB,,Junio,2026,,,#DIV/0!
+23/06/2026,Walmart,,Junio,2026,,,#DIV/0!
+23/06/2026,Bodega,,Junio,2026,,,#DIV/0!
+23/06/2026,Chedraui,,Junio,2026,,,#DIV/0!`;
+init();
+</script>
+</body>
+</html>
