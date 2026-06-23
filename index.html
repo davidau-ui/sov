@@ -219,26 +219,61 @@ const DAYS_ES    = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','
 // ── CSV PARSER ────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split('\n').map(l => l.trim()).filter(Boolean);
-  // skip header
+  if (lines.length < 2) return {};
+
+  // Parse header to find column indexes by name (handles any column order/extras)
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase()
+    .replace(/[^a-záéíóúüñ0-9]/gi, ' ').trim());
+
+  function findCol(...names) {
+    for (const name of names) {
+      const idx = headers.findIndex(h => h.includes(name));
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  }
+
+  const iDate  = findCol('fecha');
+  const iBrand = findCol('marca');
+  const iMen   = findCol('menciones');
+  const iVT    = findCol('venta tienda', 'ventatienda', 'venta_tienda');
+  const iVL    = findCol('venta en linea', 'venta linea', 'ventalinea', 'en linea');
+  const iSOV   = findCol('sov', '% sov', '%');
+
   const rawData = {};
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(',');
-    if (cols.length < 6) continue;
-    const [rawDate, marca, menStr, vtStr, vlStr, sovStr] = cols.map(c => c.trim());
+    // Handle quoted fields with commas inside (e.g. "$530,751,901")
+    const cols = [];
+    let cur = '', inQ = false;
+    for (const ch of lines[i]) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur.trim());
+
+    const rawDate = iDate >= 0 ? cols[iDate] : '';
+    const marca   = iBrand >= 0 ? cols[iBrand] : '';
     if (!rawDate || !marca) continue;
 
     // parse date DD/MM/YYYY → YYYY-MM-DD
     const parts = rawDate.split('/');
     if (parts.length !== 3) continue;
-    const date = `${parts[2]}-${parts[1]}-${parts[0]}`;
+    const date = `${parts[2].length === 4 ? parts[2] : '20'+parts[2]}-${parts[1]}-${parts[0]}`;
 
-    const sov = sovStr ? parseFloat(sovStr.replace('%','')) : null;
-    const menciones = menStr ? parseInt(menStr) : 0;
-    const vt = vtStr ? parseFloat(vtStr.replace(/[$,]/g,'')) : null;
-    const vl = vlStr ? parseFloat(vlStr.replace(/[$,]/g,'')) : null;
+    const clean = s => s ? parseFloat(s.replace(/[$,%\s]/g,'').replace(/,/g,'')) : null;
+    const sov      = iSOV  >= 0 ? clean(cols[iSOV])  : null;
+    const menciones= iMen  >= 0 ? (parseInt(cols[iMen]) || 0) : 0;
+    const vt       = iVT   >= 0 ? clean(cols[iVT])   : null;
+    const vl       = iVL   >= 0 ? clean(cols[iVL])   : null;
 
     if (!rawData[date]) rawData[date] = {};
-    rawData[date][marca] = { sov, menciones, vt, vl };
+    rawData[date][marca] = {
+      sov:      isNaN(sov) ? null : sov,
+      menciones,
+      vt:       isNaN(vt) ? null : vt,
+      vl:       isNaN(vl) ? null : vl
+    };
   }
   return rawData;
 }
